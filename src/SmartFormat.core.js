@@ -1,6 +1,7 @@
 /**
  * SmartFormat.JS - https://github.com/scottrippey/SmartFormat.JS
  *
+ * SmartFormat.core.js
  * Core functionality for Smart.format.
  * Only contains the default toString formatter.
  *
@@ -10,7 +11,7 @@
  * var result = Smart.format(template, data)
  *
  * Creating a custom formatter, with a custom set of extensions:
- * var formatter = new Smart.SmartFormat(selectors, formatters)
+ * var formatter = new Smart.SmartFormatter(selectors, formatters)
  */
 (function(global) {
 
@@ -23,10 +24,10 @@
 		 * @return {String}
 		 */
 		format: function(template, data) {
-			if (!this.default) {
-				this.default = new this.SmartFormat(this.defaultSelectors, this.defaultFormatters);
+			if (!Smart.default) {
+				Smart.default = new Smart.SmartFormatter(Smart.defaultSelectors, Smart.defaultFormatters);
 			}
-			return this.default.format(template, data);
+			return Smart.default.format(template, data);
 		}
 		,
 		/**
@@ -38,28 +39,33 @@
 			var extensions = [];
 			for (varnamee in hash) {
 				var extension = hash[name];
-				this.allExtensions[name] = extension;
+				Smart.allExtensions[name] = extension;
 				extensions.push(extension);
 			}
-			var list = (type == 'selector') ? this.defaultSelectors : this.defaultFormatters;
+			var list = (type == 'selector') ? Smart.defaultSelectors : Smart.defaultFormatters;
 			Array.prototype.unshift.apply(list, extensions);
 		}
+		,
+		/**
+		 * Holds the default instance of SmartFormatter
+		 */
+		default: null
+		,
+		defaultSelectors: [ ]
+		,
+		defaultFormatters: [ ]
 		,
 		/**
 		 * Holds a reference to all extensions, for the heck of it
 		 */
 		allExtensions: { }
-		,
-		defaultSelectors: [ ]
-		,
-		defaultFormatters: [ ]
 	};
 
-	Smart.SmartFormat = function(selectors, formatters) {
+	Smart.SmartFormatter = function(selectors, formatters) {
 		this.selectors = selectors;
 		this.formatters = formatters;
 	};
-	Smart.SmartFormat.prototype = {
+	Smart.SmartFormatter.prototype = {
 		format: function(template, data) {
 			var parser = /\\?\{([^}:]*):?([^}]*)\}/g;
 			var self = this;
