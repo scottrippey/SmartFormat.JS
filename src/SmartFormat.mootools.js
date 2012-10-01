@@ -14,20 +14,12 @@ String.implement({
  * Extend SmartFormat with MooTools formatting for plurals, Date, Number, and anything with a `format` function:
  */
 Smart.addExtensions('formatter', {
-	conditionalFormatter: function(value, format) {
-		if (format) {
+	pluralFormatter: function(value, format) {
+		if (format && typeOf(value) === 'number') {
 			var params = format.split('|');
 			if (params.length >= 2) {
-				switch (typeOf(value)) {
-					case 'date':
-						return (value <= new Date()) ? params[0] : params[1];
-					case 'number':
-						return (value < params.length) ? params[value] : null;
-					case 'array':
-						return (value.length) ? params[0] : params[1];
-					default:
-						return (value ? params[0] : params[1]);
-				}
+				var index = Locale.get('Number.pluralRule', [value, params.length]);
+				return params[index];
 			}
 		}
 	}
@@ -49,6 +41,22 @@ Smart.addExtensions('formatter', {
 					values = Array.clone(values).splice(values.length - 2, 0, options.last);
 				}
 				return values.join(options.join);
+			}
+		}
+	}
+	,
+	conditionalFormatter: function(value, format) {
+		if (format) {
+			var params = format.split('|');
+			if (params.length >= 2) {
+				switch (typeOf(value)) {
+					case 'date':
+						return (value <= new Date()) ? params[0] : params[1];
+					case 'number':
+						return (value < params.length) ? params[value] : null;
+					default:
+						return (value ? params[0] : params[1]);
+				}
 			}
 		}
 	}
@@ -86,45 +94,12 @@ Smart.addExtensions('formatter', {
 
 });
 
-
-
-(function() {
-
-	Smart.addExtensions('formatter', {
-		/**
-		 * Chooses one of the options, based on a number and the current Locale plural rules.
-		 */
-		pluralFormatter: function(value, format) {
-			if (format && typeOf(value) === 'number') {
-				var params = format.split('|');
-				if (params.length >= 2) {
-					var index = Locale.get('Number.pluralRule', [value, params.length]);
-					return params[index];
-				}
-			}
-		}
-	});
-
-	// Expose the pluralRules:
-	Smart.pluralRules = {
-		pluralRuleEnglish: function(value, pluralCount) {
-			switch (pluralCount) {
-				case 2:
-					// singular|plural
-					return (value === 1) ? 0 : 1;
-				case 3:
-					// zero|singular|plural
-					return (value === 0) ? 0 : (value === 1) ? 1 : 2;
-				default:
-					// negative|zero|singular|plural
-					return (value < 0) ? 0 : (value === 0) ? 1 : (value === 1) ? 2 : 3;
-			}
-		}
-	};
-
-	// Implement some Plural Formatting rules:
-	Locale.define('en-US', 'Number', 'pluralRule', Smart.pluralRules.pluralRuleEnglish);
-	Locale.define('es-ES', 'Number', 'pluralRule', Smart.pluralRules.pluralRuleEnglish);
-
-
-})();
+// Grab Plural Formatting rules:
+Locale.list().each(function(languageCode) {
+	var pluralRule = Smart.getPluralRule(languageCode);
+	if (pluralRule == null) {
+		// PluralRule for this Language is unknown
+		return;
+	}
+	Locale.define(languageCode, 'Number', 'pluralRule', pluralRule);
+});
