@@ -37,7 +37,7 @@
 		 */
 		addExtensions: function(type, hash) {
 			var extensions = [];
-			for (varnamee in hash) {
+			for (var name in hash) {
 				var extension = hash[name];
 				Smart.allExtensions[name] = extension;
 				extensions.push(extension);
