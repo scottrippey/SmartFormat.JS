@@ -1,0 +1,8 @@
+body {
+    color: #CCC;
+}
+.ready {
+    transition: color 1s;
+    transition-delay: 0.5s;
+    color: black;
+}

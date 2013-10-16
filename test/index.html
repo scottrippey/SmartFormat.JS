@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html ng-app="Test" ng-controller="Test">
+<head>
+	<link type="text/css" href="index.css" />
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.0-rc.3/angular.js"></script>
+	<script src="../src/SmartFormat/SmartFormat.core.js"></script>
+	<script src="../src/SmartFormat/SmartFormat.formatters.js"></script>
+	<script>
+		angular.module('Test', []).controller('Test', function ($scope) {
+			$scope.template = "Testing {0} {1} {2:asdf{1}}    ";
+			$scope.$watch('template', function(template) {
+				var results = {
+					text: Smart.format(template, [ 'zero', 'one', 'two' ])
+					,
+					parsed: Smart._parseTemplate(template)
+				};
+
+				$scope.results = JSON.stringify(results, null, '\t');
+			});
+		});
+	</script>
+</head>
+<body ng-class="'ready'">
+	<fieldset>
+		Template:
+		<input ng-model="template" />
+	</fieldset>
+
+	<p>
+		Results:
+	</p>
+
+	<pre>{{ results }}</pre>
+
+</body>
+</html>
