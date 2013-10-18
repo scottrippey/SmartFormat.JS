@@ -23,8 +23,6 @@
 			this._rules[ruleName] = pluralRule;
 		}
 		, getRule: function(languageCode) {
-			if (!languageCode && !this._defaultCode) return null;
-
 			// Calling this with no parameters will return the default:
 			if (!languageCode) {
 				return this._defaultRule || (this._defaultRule = this.getRule(this._defaultCode));
