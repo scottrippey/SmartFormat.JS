@@ -83,29 +83,27 @@
 	 */
 	PluralRules.mapLanguageCodes('en,de,nl,sv,da,no,nn,nb,fo,es,pt,it,bg,el,fi,et,he,eo,hu,tr', 'english');
 	PluralRules.defineRule('english', function PluralRule_english(value, choices) {
-		// singular used for 1.
-		// Optional special cases for zero and negative
+		// singular used for 1
+		// special cases for 0 and negative
+		var singular = (value === 1);
+		if (choices === 2) return (singular ? 0 : 1);
 
-		// singular, plural
-		// zero, singular, plural
-		// negative, zero, singular, plural
-		if (choices == 2) {
-			return (value == 1 ? 0 : 1);
-		} else if (choices == 3) {
-			return (value == 0) ? 0 : (value == 1) ? 1 : 2;
-		} else {
-			return (value < 0) ? 0 : (value == 0) ? 1 : (value == 1) ? 2 : 3;
-		}
+		var zero = (value === 0);
+		if (choices === 3) return (zero ? 0 : singular ? 1 : 2);
+
+		var negative = (value < 0);
+		return (negative ? 0 : zero ? 1 : singular ? 2 : 3);
 	});
 
 	/**
 	 * Romanic family
-	 *  Brazilian Portuguese, French
+	 *  French, Brazilian Portuguese
 	 */
-	PluralRules.mapLanguageCodes('fr', 'french');
+	PluralRules.mapLanguageCodes('fr,pt-br', 'french');
 	PluralRules.defineRule('french', function PluralRule_french(value, choices) {
-		// singular used for zero and one
-		return (value == 0 || value == 1) ? 0 : 1;
+		// singular used for 0 and 1
+		var singular = (value === 0 || value === 1);
+		return (singular ? 0 : 1);
 	});
 
 	/**
@@ -114,10 +112,13 @@
 	 */
 	PluralRules.mapLanguageCodes('lv', 'latvian');
 	PluralRules.defineRule('latvian', function PluralRule_latvian(value, choices) {
-		// singular used for
-		// zero, singular, plural
-		// Three forms, special case for zero
-		return (value % 10 == 1 && value % 100 != 11) ? 0 : (value != 0) ? 1 : 2;
+		// singular used for 1, 21, 31, 41... -- but not 11, 111, 211, 311, 411...
+		// special case for 0
+		var singular = (value % 10 === 1 && value % 100 != 11);
+		if (choices === 2) return (singular ? 0 : 1);
+
+		var zero = (value === 0);
+		return (zero ? 0 : singular ? 1 : 2);
 	});
 
 	/**
@@ -126,8 +127,13 @@
 	 */
 	PluralRules.mapLanguageCodes('ga', 'irish');
 	PluralRules.defineRule('irish', function PluralRule_irish(value, choices) {
-		// Three forms, special cases for one and two
-		return (value == 1) ? 0 : (value == 2) ? 1 : 2;
+		// singular used for 1
+		// special case for 2
+		var singular = (value === 1);
+		if (choices === 2) return (singular ? 0 : 1);
+
+		var two = (value === 2);
+		return (singular ? 0 : two ? 1 : 2);
 	});
 
 	/**
@@ -136,8 +142,13 @@
 	 */
 	PluralRules.mapLanguageCodes('ro', 'romanian');
 	PluralRules.defineRule('romanian', function PluralRule_romanian(value, choices) {
-		// Three forms, special case for numbers ending in 00 or [2-9][0-9]
-		return (value == 1) ? 0 : (value == 0 || (value % 100 > 0 && value % 100 < 20)) ? 1 : 2;
+		// singular used for 1
+		// special case for 0 and numbers ending in 01-19 (0, 2-19, 101-119, 201-219...)
+		var singular = (value === 1);
+		if (choices === 2) return (singular ? 0 : 1);
+
+		var few = (value === 0 || (value % 100 >= 1 && value % 100 <= 19));
+		return (singular ? 0 : few ? 1 : 2);
 	});
 
 	/**
@@ -146,8 +157,13 @@
 	 */
 	PluralRules.mapLanguageCodes('lt', 'lithuanian');
 	PluralRules.defineRule('lithuanian', function PluralRule_lithuanian(value, choices) {
-		// Three forms, special case for numbers ending in 1[2-9]
-		return (value % 10 == 1 && value % 100 != 11) ? 0 : (value % 10 >= 2 && (value % 100 < 10 || value % 100 >= 20)) ? 1 : 2;
+		// singular used for numbers ending in 1 (1, 21, 31, 41...)
+		// special case for numbers ending in 12-19 (12-19, 112-119, 212-219...)
+		var singular = (value % 10 === 1 && value % 100 != 11);
+		if (choices === 2) return singular ? 0 : 1;
+
+		var few = (value % 100 >= 12 && value % 100 <= 19);
+		return singular ? 0 : few ? 1 : 2;
 	});
 
 	/**
@@ -156,8 +172,14 @@
 	 */
 	PluralRules.mapLanguageCodes('ru,uk,sr,hr', 'russian');
 	PluralRules.defineRule('russian', function PluralRule_russian(value, choices) {
-		// Three forms, special cases for numbers ending in 1 and 2, 3, 4, except those ending in 1[1-4]
-		return (value % 10 == 1 && value % 100 != 11) ? 0 : (value % 10 >= 2 && value % 10 <= 4 && (value % 100 < 10 || value % 100 >= 20)) ? 1 : 2;
+		// singular used for numbers ending in 1, except 11 (1, 21, 31...)
+		// special case for numbers ending in 2-4, except 12-14 (2-4, 22-24, 32-34...)
+		// numbers ending in 11-14 use plural (11-14, 111-114, 211-214...)
+		var singular = (value % 10 === 1 && value % 100 != 11);
+		if (choices === 2) return singular ? 0 : 1;
+
+		var few = (value % 10 >= 2 && value % 10 <= 4 && (value % 100 < 10 || value % 100 >= 20));
+		return singular ? 0 : few ? 1 : 2;
 	});
 
 	/**
@@ -166,8 +188,13 @@
 	 */
 	PluralRules.mapLanguageCodes('cs,sk', 'czech');
 	PluralRules.defineRule('czech', function PluralRule_czech(value, choices) {
-		// Three forms, special cases for 1 and 2, 3, 4
-		return (value == 1) ? 0 : (value >= 2 && value <= 4) ? 1 : 2;
+		// singular used for 1
+		// special case for 2-4
+		var singular = (value === 1);
+		if (choices === 2) return singular ? 0 : 1;
+
+		var few = (value >= 2 && value <= 4);
+		return singular ? 0 : few ? 1 : 2;
 	});
 
 	/**
@@ -176,8 +203,13 @@
 	 */
 	PluralRules.mapLanguageCodes('pl', 'polish');
 	PluralRules.defineRule('polish', function PluralRule_polish(value, choices) {
-		// Three forms, special case for one and some numbers ending in 2, 3, or 4
-		return (value == 1) ? 0 : (value % 10 >= 2 && value % 10 <= 4 && (value % 100 < 10 || value % 100 >= 20)) ? 1 : 2;
+		// singular used for 1
+		// special case for numbers ending in 2-4, except for 12-14 (2-4, 22-24, 32-34...)
+		var singular = (value === 1);
+		if (choices === 2) return singular ? 0 : 1;
+
+		var few = (value % 10 >= 2 && value % 10 <= 4 && (value % 100 < 10 || value % 100 >= 20));
+		return singular ? 0 : few ? 1 : 2;
 	});
 
 	/**
@@ -186,8 +218,17 @@
 	 */
 	PluralRules.mapLanguageCodes('sl', 'slovenian');
 	PluralRules.defineRule('slovenian', function PluralRule_slovenian(value, choices) {
-		// Four forms, special case for one and all numbers ending in 02, 03, or 04
-		return (value % 100 == 1) ? 0 : (value % 100 == 2) ? 1 : (value % 100 == 3 || value % 100 == 4) ? 2 : 3;
+		// singular used for numbers ending in 01 (1, 101, 201...)
+		// special case for numbers ending in 02 (2, 102, 202...)
+		// special case for numbers ending in 03-04 (3-4, 103-104, 203-204...)
+		var singular = (value % 100 === 1);
+		if (choices === 2) return singular ? 0 : 1;
+
+		var two = (value % 100 === 2);
+		if (choices === 3) return singular ? 0 : two ? 1 : 2;
+
+		var few = (value % 100 === 3 || value % 100 === 4);
+		return singular ? 0 : two ? 1 : few ? 2 : 3;
 	});
 
 
