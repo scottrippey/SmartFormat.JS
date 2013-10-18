@@ -4,9 +4,11 @@
 		_codeMap: {} // Map of language codes to rule names
 		, _rules: {} // Map of rule names to rules
 
-		, default: null
+		, _defaultCode: 'en'
+		, _defaultRule: null
 		, setDefault: function(languageCode) {
-			this.default = this.getRule(languageCode);
+			this._defaultCode = languageCode.toLowerCase();
+			this._defaultRule = null; // Lazy-loaded
 		}
 
 		, mapLanguageCodes: function(languageCodes, ruleName) {
@@ -21,6 +23,13 @@
 			this._rules[ruleName] = pluralRule;
 		}
 		, getRule: function(languageCode) {
+			if (!languageCode && !this._defaultCode) return null;
+
+			// Calling this with no parameters will return the default:
+			if (!languageCode) {
+				return this._defaultRule || (this._defaultRule = this.getRule(this._defaultCode));
+			}
+
 			languageCode = languageCode.toLowerCase();
 
 			// You can look for a rule by name:
