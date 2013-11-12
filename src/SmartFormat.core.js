@@ -41,9 +41,14 @@
 				var extension = hash[name];
 				Smart.allExtensions[name] = extension;
 				extensions.push(extension);
+
+				if (type == 'selector') {
+					Smart.defaultSelectors.unshift(extension);
+				}
+				else if (type == 'formatter') {
+					Smart.defaultFormatters.unshift(extension);
+				}
 			}
-			var list = (type == 'selector') ? Smart.defaultSelectors : Smart.defaultFormatters;
-			Array.prototype.unshift.apply(list, extensions);
 		}
 		,
 		/**
