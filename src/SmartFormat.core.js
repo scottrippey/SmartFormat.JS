@@ -36,14 +36,17 @@
 		 * @param hash
 		 */
 		addExtensions: function(type, hash) {
-			var extensions = [];
-			for (varnamee in hash) {
+			for (var name in hash) {
 				var extension = hash[name];
 				Smart.allExtensions[name] = extension;
-				extensions.push(extension);
+
+				if (type == 'selector') {
+					Smart.defaultSelectors.unshift(extension);
+				}
+				else if (type == 'formatter') {
+					Smart.defaultFormatters.unshift(extension);
+				}
 			}
-			var list = (type == 'selector') ? Smart.defaultSelectors : Smart.defaultFormatters;
-			Array.prototype.unshift.apply(list, extensions);
 		}
 		,
 		/**
@@ -78,9 +81,10 @@
 		,
 		evaluateSelector: function(data, properties) {
 			var value = data;
+			var self = this;
 			each(properties.split('.'), function(property) {
-				each(this.selectors, function(selector) {
-					var result = selector(value, property);
+				each(self.selectors, function (selector) {
+				var result = selector(value, property);
 					if (result !== undefined) {
 						value = result;
 						return true;
