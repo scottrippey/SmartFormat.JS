@@ -35,17 +35,19 @@
 		 * @param type
 		 * @param hash
 		 */
-		addExtensions: function(type, hash) {
+		addExtensions: function (type, hash) {
+			var target = null;
+			if (type == 'selector') {
+				target = Smart.defaultSelectors;
+			} else if (type == 'formatter') {
+				target = Smart.defaultFormatters;
+			}
+
 			for (var name in hash) {
 				var extension = hash[name];
 				Smart.allExtensions[name] = extension;
 
-				if (type == 'selector') {
-					Smart.defaultSelectors.unshift(extension);
-				}
-				else if (type == 'formatter') {
-					Smart.defaultFormatters.unshift(extension);
-				}
+				target.unshift(extension);
 			}
 		}
 		,
