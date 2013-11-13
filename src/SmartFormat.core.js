@@ -84,13 +84,14 @@
 			var self = this;
 			each(properties.split('.'), function(property) {
 				each(self.selectors, function (selector) {
-				var result = selector(value, property);
-					if (result !== undefined) {
-						value = result;
-						return true;
+					var result = selector(value, property);
+						if (result !== undefined) {
+							value = result;
+							return true;
 					}
+					});
 				});
-			});
+
 			return value;
 		}
 		,
