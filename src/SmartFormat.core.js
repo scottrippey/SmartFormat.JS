@@ -36,11 +36,9 @@
 		 * @param hash
 		 */
 		addExtensions: function(type, hash) {
-			var extensions = [];
 			for (var name in hash) {
 				var extension = hash[name];
 				Smart.allExtensions[name] = extension;
-				extensions.push(extension);
 
 				if (type == 'selector') {
 					Smart.defaultSelectors.unshift(extension);
