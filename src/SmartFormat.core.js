@@ -41,6 +41,8 @@
 				target = Smart.defaultSelectors;
 			} else if (type == 'formatter') {
 				target = Smart.defaultFormatters;
+			} else {
+				throw "Unknown extension type";
 			}
 
 			for (var name in hash) {
