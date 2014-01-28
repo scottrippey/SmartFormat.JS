@@ -24,15 +24,15 @@
 		 * @return {String}
 		 */
 		format: function(template, data) {
-			if (!Smart.default) {
-				Smart.default = new Smart.SmartFormatter(Smart.defaultSelectors, Smart.defaultFormatters);
+			if (!Smart.defaultInstance) {
+				Smart.defaultInstance = new Smart.SmartFormatter(Smart.defaultSelectors, Smart.defaultFormatters);
 			}
-			return Smart.default.format(template, data);
+			return Smart.defaultInstance.format(template, data);
 		}
 		,
 		/**
 		 * Adds the extensions to the list of default extensions
-		 * @param type
+		 * @param type - Either 'selector' or 'formatter'
 		 * @param hash
 		 */
 		addExtensions: function(type, hash) {
@@ -49,7 +49,7 @@
 		/**
 		 * Holds the default instance of SmartFormatter
 		 */
-		default: null
+		defaultInstance: null
 		,
 		defaultSelectors: [ ]
 		,
@@ -86,7 +86,7 @@
 						return true;
 					}
 				});
-			});
+			}, this);
 			return value;
 		}
 		,
@@ -104,9 +104,9 @@
 	};
 
 	// Helper method: short-circuiting loop:
-	function each(array, callback) {
+	function each(array, callback, bind) {
 		for (var i = 0, l = array.length; i < l; i++) {
-			if (callback(array[i]))
+			if (callback.call(bind, array[i], i))
 				return true;
 		}
 		return false;
@@ -123,7 +123,7 @@
 		/**
 		 * Supports parsing of dot-notation and evaluating simple functions
 		 */
-		defaultSelector: function(value, selector) {
+		'defaultSelector': function(value, selector) {
 			if (value !== undefined && value !== null) {
 				var fn = selector.split('()');
 				if ((fn.length == 2) && (typeof value[fn[0]] === 'function')) {
@@ -143,9 +143,9 @@
 		 * Converts the value into a string;
 		 * also supports calling `toString(format)`
 		 */
-		defaultFormatter: function(value, format) {
+		'defaultFormatter': function(value, format) {
 			if (value !== undefined && value != null && format) {
-				if (typeOf(value.toString) === 'function') {
+				if (typeof value.toString === 'function') {
 					return value.toString(format);
 				}
 			}
