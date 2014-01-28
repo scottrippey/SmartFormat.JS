@@ -35,15 +35,22 @@
 		 * @param type - Either 'selector' or 'formatter'
 		 * @param hash
 		 */
-		addExtensions: function(type, hash) {
-			var extensions = [];
+		addExtensions: function (type, hash) {
+			var target = null;
+			if (type == 'selector') {
+				target = Smart.defaultSelectors;
+			} else if (type == 'formatter') {
+				target = Smart.defaultFormatters;
+			} else {
+				throw "Unknown extension type";
+			}
+
 			for (var name in hash) {
 				var extension = hash[name];
 				Smart.allExtensions[name] = extension;
-				extensions.push(extension);
+
+				target.unshift(extension);
 			}
-			var list = (type == 'selector') ? Smart.defaultSelectors : Smart.defaultFormatters;
-			Array.prototype.unshift.apply(list, extensions);
 		}
 		,
 		/**
@@ -81,9 +88,9 @@
 			each(properties.split('.'), function(property) {
 				each(this.selectors, function(selector) {
 					var result = selector(value, property);
-					if (result !== undefined) {
-						value = result;
-						return true;
+						if (result !== undefined) {
+							value = result;
+							return true;
 					}
 				});
 			}, this);
