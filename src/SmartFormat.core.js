@@ -88,9 +88,9 @@
 			each(properties.split('.'), function(property) {
 				each(this.selectors, function(selector) {
 					var result = selector(value, property);
-						if (result !== undefined) {
-							value = result;
-							return true;
+					if (result !== undefined) {
+						value = result;
+						return true;
 					}
 				});
 			}, this);
@@ -151,7 +151,7 @@
 		 * also supports calling `toString(format)`
 		 */
 		'defaultFormatter': function(value, format) {
-			if (value !== undefined && value != null && format) {
+			if (value !== undefined && value !== null && format) {
 				if (typeof value.toString === 'function') {
 					return value.toString(format);
 				}
