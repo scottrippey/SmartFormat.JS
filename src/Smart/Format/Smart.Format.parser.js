@@ -15,63 +15,59 @@
 	
 	
 	function parse(templateString) {
-		
-		var templateIndex = 0, templateLength = templateString.length;
-		
+				
 		// template = literal { selector [: template : template ...]} literal
 		
 		function template() {
-			var r = find(literal, repeat(placeholder, literal));
-			return r[1].reduce(function(result, placeholderAndLiteral) { 
-				result.push(placeholderAndLiteral[0], placeholderAndLiteral[1]); 
-				return result;
-			}, [ r[0] ]);
+			var r = read(literal, repeat(placeholder, literal));
+			var template = [ r[0] ];
+			r[1].forEach(function(placeholderAndLiteral) {
+				template.push(placeholderAndLiteral[0], placeholderAndLiteral[1]);
+			});
+			return template;
 		}
 		function templateNoColon() {
-			var r = find(literalNoColon, repeat(placeholder, literalNoColon));
-			return r[1].reduce(function(result, placeholderAndLiteral) {
-				result.push(placeholderAndLiteral[0], placeholderAndLiteral[1]);
-				return result;
-			}, [ r[0] ]);
+			var r = read(literalNoColon, repeat(placeholder, literalNoColon));
+			var template = [ r[0] ];
+			r[1].forEach(function(placeholderAndLiteral) {
+				template.push(placeholderAndLiteral[0], placeholderAndLiteral[1]);
+			});
+			return template;
 		}
 		function literal() {
 			var notBrace = not('{', '}');
-			var r = find(notBrace);
-			if (r === null) return "";
+			var r = read(notBrace);
 			return r[0];
 		}
 		function literalNoColon() {
-			var notBrace = not('{', '}', ':');
-			var r = find(notBrace);
-			if (r === null) return "";
+			var notBraceColon = not('{', '}', ':');
+			var r = read(notBraceColon);
 			return r[0];
 		}
 		
 		
 		function placeholder() {
-			var r = find('{', selector, repeat(':', templateNoColon), '}');
+			var r = read('{', selector, repeat(':', templateNoColon), '}');
 			if (r === null) return null;
 			var placeholder = {
 				selector: r[1],
-				formats: r[2].reduce(function(results, colonTemplate) {
-					results.push(colonTemplate[1]);
-					return results;
-				}, [])
+				formats: r[2].map(function(colonTemplate) { return colonTemplate[1]; })
 			};
 			return placeholder;
 		}
 		function selector() {
-			var r = find(not(':', '}'));
+			var r = read(not(':', '}'));
 			return r[0];
 		}
-		
 
+
+		var templateIndex = 0, templateLength = templateString.length;
 		function repeat(patterns_) {
 			var patterns = arguments;
 			return function pattern_for_repeat() {
 				var results = [];
 				while (true) {
-					var r = find.apply(null, patterns);
+					var r = read.apply(null, patterns);
 					if (r === null) break;
 					results.push(r);
 				}
@@ -95,7 +91,7 @@
 				return templateString.substring(startIndex, templateIndex);
 			};
 		}
-		function find(patterns_) {
+		function read(patterns_) {
 			var patterns = arguments;
 			var restoreIndex = templateIndex;
 			var results = new Array(patterns.length);
@@ -119,7 +115,7 @@
 			}
 			return results;
 		}
-
+		
 		return template();
 	}
 	
