@@ -1,18 +1,8 @@
 (function() {
-	var tests = [
-		" LITERAL { SELECTOR 1 } MORE LITERAL "	
-		," LITERAL { SELECTOR 1 } MIDDLE LITERAL { SELECTOR 2 } MORE LITERAL "	
-		," LITERAL { SELECTOR : LITERAL } MORE LITERAL "	
-		," LITERAL { SELECTOR : FORMATTER : LITERAL } MORE LITERAL "	
-		," LITERAL { SELECTOR : FORMATTER : PARAM 1 : LITERAL } MORE LITERAL "	
-		," LITERAL { SELECTOR : FORMATTER : PARAM 1 : PARAM 2 : LITERAL } MORE LITERAL "	
-		," LITERAL { SELECTOR : FORMATTER : PARAM 1 : PARAM 2 { } : { NESTED.SELECTOR : NESTED TEMPLATE } : LITERAL } MORE LITERAL "	
-	];
-	tests.forEach(function(test) {
-		var result = parse(test);
-		console.log(test, JSON.stringify(result, null, '  '));
-	});
-	
+	Smart.format = function(template, data) {
+		return Smart.Format.parse(template)(data);
+	};
+	Smart.Format.parse = parse;
 	
 	function parse(templateString) {
 				
@@ -20,17 +10,23 @@
 		
 		function template() {
 			var r = read(literal, repeat(placeholder, literal));
-			var template = [ r[0] ];
+			
+			var template = r[0] ? [ r[0] ] : [];
 			r[1].forEach(function(placeholderAndLiteral) {
-				template.push(placeholderAndLiteral[0], placeholderAndLiteral[1]);
+				template.push(placeholderAndLiteral[0]);
+				if (placeholderAndLiteral[1])
+					template.push(placeholderAndLiteral[1]);
 			});
 			return template;
 		}
 		function templateNoColon() {
 			var r = read(literalNoColon, repeat(placeholder, literalNoColon));
-			var template = [ r[0] ];
+			
+			var template = r[0] ? [ r[0] ] : [];
 			r[1].forEach(function(placeholderAndLiteral) {
-				template.push(placeholderAndLiteral[0], placeholderAndLiteral[1]);
+				template.push(placeholderAndLiteral[0]);
+				if (placeholderAndLiteral[1])
+					template.push(placeholderAndLiteral[1]);
 			});
 			return template;
 		}
