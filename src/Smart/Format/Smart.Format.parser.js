@@ -1,10 +1,16 @@
 (function() {
 	Smart.format = function(template, data) {
-		return Smart.Format.parse(template)(data);
+		var templateTree = parseTree(template);
+		return injectData(templateTree, data);
 	};
-	Smart.Format.parse = parse;
+	Smart.Format.parse = function(template) {
+		var templateTree = parseTree(template);
+		return function(data) {
+			return injectData(templateTree, data);
+		};
+	};
 	
-	function parse(templateString) {
+	function parseTree(templateString) {
 				
 		// template = literal { selector [: template : template ...]} literal
 		
@@ -112,7 +118,12 @@
 			return results;
 		}
 		
-		return template();
+		var templateTree = template();
+		return templateTree;
+	}
+	
+	function injectData(templateTree, data) {
+		return "NOT IMPLEMENTED YET ... " + JSON.stringify(data) + JSON.stringify(templateTree);
 	}
 	
 })();
