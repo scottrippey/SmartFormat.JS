@@ -1,0 +1,23 @@
+{
+  "name": "SmartFormat.JS",
+  "version": "0.8.0",
+  "description": "A templating library focused on forming natural language from data",
+  "main": "dist/latest/Smart.Format.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/scottrippey/SmartFormat.JS.git"
+  },
+  "author": "Scott Rippey",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/scottrippey/SmartFormat.JS/issues"
+  },
+  "homepage": "https://github.com/scottrippey/SmartFormat.JS",
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-contrib-jasmine": "~0.6.4"
+  }
+}
