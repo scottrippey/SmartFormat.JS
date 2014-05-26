@@ -53,11 +53,11 @@
 			};
 		}
 		,repeat: function (patterns_) {
-			var patterns = this.pattern.apply(this, arguments);
+			var pattern = this.pattern.apply(this, arguments);
 			return function patternFactory_repeat(currentParse) {
 				var results = [];
 				while (true) {
-					var result = patterns(currentParse);
+					var result = pattern.call(this, currentParse);
 					if (!result) break;
 					results.push(result);
 				}
@@ -79,7 +79,7 @@
 			var pattern = this.any.apply(this, arguments);
 			return function patternFactory_until(currentParse) {
 				while (true) {
-					var result = pattern(currentParse);
+					var result = pattern.call(this, currentParse);
 					if (result) return result;
 					currentParse.templateIndex++;
 				}
@@ -89,7 +89,7 @@
 			var pattern = this.pattern.apply(this, arguments);
 			return function patternFactory_optional(currentParse) {
 				var restoreIndex = currentParse.templateIndex;
-				var result = pattern(currentParse);
+				var result = pattern.call(this, currentParse);
 				if (!result) {
 					currentParse.templateIndex = restoreIndex;
 				}
