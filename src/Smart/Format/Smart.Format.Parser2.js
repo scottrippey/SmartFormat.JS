@@ -99,17 +99,22 @@
 	};
 	Smart.Format.PatternFactory = PatternFactory;
 })();
+
 (function init_Parser() {
 	
 	var PatternFactory = Smart.Format.PatternFactory;
 	
 	function Parser() {}
 	Parser.prototype = {
-		template: function (template) {
+		parse: function(templateString) {
+			var currentParse = { templateString: templateString, templateIndex: 0 };
+			return this.template(currentParse);
+		}
+		,template: function (currentParse) {
 			if (!this._template) {
 				this._template = PatternFactory.repeat(this.literal, this.placeholder);
 			}
-			var repeats = this._template(template);
+			var repeats = this._template(currentParse);
 
 			var items = [];
 			repeats.forEach(function (literalPlaceholder) {
@@ -118,30 +123,31 @@
 			});
 			return items;
 		}
-		,literal: function (template) {
+		,literal: function (currentParse) {
 			if (!this._literal) {
 				this._literal = PatternFactory.until('{');
 			}
-			return this._literal(template);
+			return this._literal(currentParse);
 		}
-		,placeholder: function (template) {
+		,placeholder: function (currentParse) {
 			if (!this._placeholder) {
 				this._placeholder = PatternFactory.pattern('{', this.selector, PatternFactory.optional(':', this.template), '}');
 			}
-			return this._placeholder(template, function (openBrace, selector, colonTemplate, closeBrace) {
+			return this._placeholder(currentParse, function (openBrace, selector, colonTemplate, closeBrace) {
 				return { selector: selector, format: colonTemplate[1] || [] };
 			});
 		}
-		,selector: function (template) {
+		,selector: function (currentParse) {
 			if (!this._selector) {
 				this._selector = PatternFactory.until(':', '}');
 			}
-			return this._selector(template);
+			return this._selector(currentParse);
 		}
 	};
 
 	Smart.Format.Parser = Parser;
 })();
+
 (function init_Formatter() {
 
 	function Formatter(parser) {
@@ -153,14 +159,13 @@
 			this.formatters = {};
 		}
 		,format: function(templateString, data) {
-			var template = { templateString: templateString, templateIndex: 0 };
-			var templateTree = this.parser.template(template);
+			var templateTree = this.parser.parse(templateString);
 			if (data === undefined) {
 				return function (data) {
-					return Formatter.formatTree(templateTree, data);
-				};
+					return this.formatTree(templateTree, data);
+				}.bind(this);
 			} else {
-				return Formatter.formatTree(templateTree, data);
+				return this.formatTree(templateTree, data);
 			}
 		}
 		,formatTree: function(templateTree, data) {
@@ -222,7 +227,7 @@
 	// Defaults:
 	Smart.Format.defaultFormatter = new Formatter();
 	Smart.format = Smart.Format.format = function(templateString, data) {
-		Smart.Format.defaultFormatter.format(templateString, data);
+		return Smart.Format.defaultFormatter.format(templateString, data);
 	};
 	
 })();
